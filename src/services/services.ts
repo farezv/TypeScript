@@ -1933,7 +1933,9 @@ module ts {
                         current = child;
                         continue outer;
                     }
-                    if (child.end > position) break;
+                    if (child.end > position) {
+                        break;
+                    }
                 }
                 return current;
             }
@@ -2167,6 +2169,12 @@ module ts {
             }
 
             return getReferencesForNode(node, [sourceFile]);
+
+            function keywordsToReferenceEntries(keywords: Node[]): ReferenceEntry[]{
+                return keywords.map(keyword =>
+                    new ReferenceEntry(filename, TypeScript.TextSpan.fromBounds(keyword.getStart(), keyword.end), /* isWriteAccess */ false)
+                );
+            }
         }
 
         function getReferencesAtPosition(filename: string, position: number): ReferenceEntry[] {
@@ -2284,13 +2292,13 @@ module ts {
                     var container = getContainerNode(declarations[i]);
 
                     if (scope && scope !== container) {
-                        // Diffrent declarations have diffrent containers, bail out
+                        // Different declarations have different containers, bail out
                         return undefined;
                     }
 
                     if (container.kind === SyntaxKind.SourceFile && !isExternalModule(<SourceFile>container)) {
                         // This is a global variable and not an external module, any declaration defined
-                        // withen this scope is visible outside the file
+                        // within this scope is visible outside the file
                         return undefined;
                     }
 
